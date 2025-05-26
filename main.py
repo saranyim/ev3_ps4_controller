@@ -29,8 +29,15 @@ right_motor = Motor(Port.C)
 
 # Initialize variables. 
 # Assuming sticks are in the middle when starting.
+left_stick_left = 0
+left_stick_forward = 0
+
+right_stick_left = 0
+right_stick_foward = 0
+
 right_stick_x = 124
 right_stick_y = 124
+
 
 left_stick_x = 124
 left_stick_y = 124
@@ -70,29 +77,38 @@ in_file = open(infile_path, "rb")
 FORMAT = 'llHHI'    
 EVENT_SIZE = struct.calcsize(FORMAT)
 event = in_file.read(EVENT_SIZE)
-
+# stick y top 0 bottom 255, stick x left 0, right 255
 while event:
     (tv_sec, tv_usec, ev_type, code, value) = struct.unpack(FORMAT, event)
     if ev_type == 3 and code == 0:
         left_stick_x = value
+        left_stick_left = scale(left_stick_x, (0,255), (-100,100),-2,2)
     if(ev_type == 3 and code == 1):
         left_stick_y = value
+        left_stick_forward = scale(left_stick_y, (0,255), (100,-100),-2,2)
     if ev_type == 3 and code == 3:
         right_stick_x = value
+        right_stick_left = scale(right_stick_x, (0,255), (-100,100),-2,2)
     if ev_type == 3 and code == 4:
         right_stick_y = value
+        right_stick_foward = scale(right_stick_y, (0,255), (100,-100),-2,2)
     
-
-    # Scale stick positions to -100,100
-    forward = scale(left_stick_y, (0,255), (100,-100),-3,3)
-    left = scale(right_stick_x, (0,255), (100,-100),-3,3)
+    
+    if left_stick_forward > 0:
+        left_motor.dc(left_stick_forward - leleft_stick_leftft)
+        right_motor.dc(left_stick_forward + left_stick_left)
+    # elif (forward > -10):
+    #     left_motor.dc(forward + left)
+    #     right_motor.dc(forward - left)
+    else :
+        # backwad turn faster hard to control
+        left_motor.dc(left_stick_forward + (left_stick_left / 2))
+        right_motor.dc(left_stick_forward - (leleft_stick_leftft / 2))
 
     # Set motor voltages. If we're steering left, the left motor
     # must run backwards so it has a -left component
     # It has a forward component for going forward too. 
-    left_motor.dc(forward - left)
-    right_motor.dc(forward + left)
-
+    
     # Finally, read another event
     event = in_file.read(EVENT_SIZE)
 
