@@ -82,28 +82,27 @@ while event:
     (tv_sec, tv_usec, ev_type, code, value) = struct.unpack(FORMAT, event)
     if ev_type == 3 and code == 0:
         left_stick_x = value
-        left_stick_left = scale(left_stick_x, (0,255), (-100,100),-2,2)
+        left_stick_left = scale(left_stick_x, (0,255), (-50,50),-2,2)
     if(ev_type == 3 and code == 1):
         left_stick_y = value
-        left_stick_forward = scale(left_stick_y, (0,255), (100,-100),-2,2)
+        left_stick_forward = scale(left_stick_y, (0,255), (100,-100),2,-2)
     if ev_type == 3 and code == 3:
         right_stick_x = value
-        right_stick_left = scale(right_stick_x, (0,255), (-100,100),-2,2)
+        right_stick_left = scale(right_stick_x, (0,255), (-50,50),-2,2)
     if ev_type == 3 and code == 4:
         right_stick_y = value
-        right_stick_foward = scale(right_stick_y, (0,255), (100,-100),-2,2)
+        right_stick_foward = scale(right_stick_y, (0,255), (100,-100),2,-2)
     
-    
-    if left_stick_forward > 0:
-        left_motor.dc(left_stick_forward - leleft_stick_leftft)
-        right_motor.dc(left_stick_forward + left_stick_left)
-    # elif (forward > -10):
-    #     left_motor.dc(forward + left)
-    #     right_motor.dc(forward - left)
+        print("stick ly ")
+        print (left_stick_forward)
+        print("\n")
+    if left_stick_forward >= 0:
+        left_motor.dc(left_stick_forward - right_stick_left)
+        right_motor.dc(left_stick_forward + right_stick_left)
     else :
         # backwad turn faster hard to control
-        left_motor.dc(left_stick_forward + (left_stick_left / 2))
-        right_motor.dc(left_stick_forward - (leleft_stick_leftft / 2))
+        left_motor.dc(left_stick_forward + (right_stick_left * 0.3))
+        right_motor.dc(left_stick_forward - (right_stick_left * 0.3))
 
     # Set motor voltages. If we're steering left, the left motor
     # must run backwards so it has a -left component
