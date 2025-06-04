@@ -24,8 +24,8 @@ from ps4keymapping import EV_KEY, EV_ABS, BTN, AXES
 brick = EV3Brick()
 
 # Declare motors 
-left_motor = Motor(Port.B)
-right_motor = Motor(Port.C)
+left_motor = Motor(Port.C)
+right_motor = Motor(Port.B)
 
 # Initialize variables. 
 # Assuming sticks are in the middle when starting.
@@ -35,25 +35,15 @@ right_stick_y = 124
 left_stick_x = 124
 left_stick_y = 124
 
+maxPower = 100
+minPower = maxPower * -1
+maxTurnPower = 80
+forward = 0
+leftPower = 0
+rightPower = 0
 # A helper function for converting stick values (0 - 255)
 # to more usable numbers (-100 - 100)
-def scale(val, src, dst, zero_offset_min=-0.0, zero_offset_max=0.0):
-    """
-    แปลงค่า val จากช่วง src ไปยังช่วง dst และตัดค่าเล็กๆ ให้เป็น 0 ถ้าอยู่ในช่วง zero offset
 
-    val: ค่าที่จะถูกแปลง
-    src: tuple เช่น (0, 255)
-    dst: tuple เช่น (-100, 100)
-    zero_offset_min: ค่าน้อยสุดที่ถือว่าเป็น 0
-    zero_offset_max: ค่าสูงสุดที่ถือว่าเป็น 0
-
-    เช่น scale(128, (0, 255), (-100, 100), -3, 3) -> 0
-    """
-    scaled = (float(val - src[0]) / (src[1] - src[0])) * (dst[1] - dst[0]) + dst[0]
-
-    if zero_offset_min <= scaled <= zero_offset_max:
-        return 0.0
-    return scaled
 
 
 # Find the PS3 Gamepad:
@@ -77,21 +67,87 @@ while event:
         left_stick_x = value
     if(ev_type == 3 and code == 1):
         left_stick_y = value
+        # print("LY ", left_stick_y)
     if ev_type == 3 and code == 3:
         right_stick_x = value
+        # print("RX ", right_stick_x)
     if ev_type == 3 and code == 4:
         right_stick_y = value
     
 
     # Scale stick positions to -100,100
-    forward = scale(left_stick_y, (0,255), (100,-100),-3,3)
-    left = scale(right_stick_x, (0,255), (100,-100),-3,3)
+    if(left_stick_y < 100):
+        # stick forward 0-117
+        forward = 100 - left_stick_y 
+    elif(left_stick_y > 155):
+        # stick back 155-255
+        forward = 155 - left_stick_y
+    else:
+        forward = 0
+    
+    if(right_stick_x < 100):
+        # stick left 0-117
+        turn = 100 - right_stick_x
+    elif(right_stick_x > 155):
+        # stick right 155-255
+        turn = 155 - right_stick_x
+    else:
+        turn = 0
+ 
+    if(-5 < forward and forward < 5): 
+        # turn no run
+        if(turn > 20):
+            #   turn left spin left forward
+            leftPower = 0
+            rightPower = maxTurnPower *  turn / 100       
+        elif turn< (-20):
+            #   turn righ spin right forward
+            leftPower = maxTurnPower *  turn / -100
+            rightPower = 0     
+        else:
+            leftPower = 0
+            rightPower = 0
+    elif (forward > 5):
+        # run and turn
+        
+        if(turn > 20):
+            #   turn left slow down left motor
+            leftPower = forward -  maxTurnPower *  turn / 100
+            rightPower = forward
+        elif turn< (-20):
+            #   turn right slow down right motor
+            rightPower = forward +  maxTurnPower *  turn / 100        
+            leftPower = forward
+            # print("LP ", leftPower, " RP ", rightPower)  
+        else:
+            rightPower = forward
+            leftPower = forward
+    elif (forward < -5):
+        if(turn > 20):
+            #   turn right slow down right motor
+            leftPower = forward +  maxTurnPower *  turn / 100
+            rightPower = forward
+        elif turn < (-20):
+            #   turn left slow down left motor
+            rightPower = forward -  maxTurnPower *  turn / 100        
+            leftPower = forward
+            
+        else:
+            rightPower = forward
+            leftPower = forward
+    else:
+            rightPower = 0
+            leftPower = 0
+    # print("LY ", left_stick_y, " RX ", right_stick_x, "  forward: ", forward, " turn: ", turn," R ",rightPower," L ",leftPower)
+
+    # wait(500)
 
     # Set motor voltages. If we're steering left, the left motor
     # must run backwards so it has a -left component
     # It has a forward component for going forward too. 
-    left_motor.dc(forward - left)
-    right_motor.dc(forward + left)
+    print("LP ", leftPower, " RP ", rightPower)
+    left_motor.dc(leftPower)
+    right_motor.dc(rightPower)
 
     # Finally, read another event
     event = in_file.read(EVENT_SIZE)
