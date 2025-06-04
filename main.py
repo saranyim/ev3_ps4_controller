@@ -29,8 +29,15 @@ right_motor = Motor(Port.B)
 
 # Initialize variables. 
 # Assuming sticks are in the middle when starting.
+left_stick_left = 0
+left_stick_forward = 0
+
+right_stick_left = 0
+right_stick_foward = 0
+
 right_stick_x = 124
 right_stick_y = 124
+
 
 left_stick_x = 124
 left_stick_y = 124
@@ -60,11 +67,12 @@ in_file = open(infile_path, "rb")
 FORMAT = 'llHHI'    
 EVENT_SIZE = struct.calcsize(FORMAT)
 event = in_file.read(EVENT_SIZE)
-
+# stick y top 0 bottom 255, stick x left 0, right 255
 while event:
     (tv_sec, tv_usec, ev_type, code, value) = struct.unpack(FORMAT, event)
     if ev_type == 3 and code == 0:
         left_stick_x = value
+        left_stick_left = scale(left_stick_x, (0,255), (-50,50),-2,2)
     if(ev_type == 3 and code == 1):
         left_stick_y = value
         # print("LY ", left_stick_y)
