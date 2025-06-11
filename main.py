@@ -85,10 +85,10 @@ while event:
     # Scale stick positions to -100,100
     if(left_stick_y < 100):
         # stick forward 0-117
-        forward = 100 - left_stick_y 
+        forward = 100  
     elif(left_stick_y > 155):
         # stick back 155-255
-        forward = 155 - left_stick_y
+        forward = -100
     else:
         forward = 0
     
@@ -101,42 +101,42 @@ while event:
     else:
         turn = 0
  
-    if(-5 < forward and forward < 5): 
+    if(-50 < forward and forward < 50): 
         # turn no run
-        if(turn > 20):
+        if(turn > 50):
             #   turn left spin left forward
             leftPower = 0
-            rightPower = maxTurnPower *  turn / 100       
-        elif turn< (-20):
+            rightPower = maxTurnPower      
+        elif turn< (-50):
             #   turn righ spin right forward
-            leftPower = maxTurnPower *  turn / -100
+            leftPower = maxTurnPower *  - 1
             rightPower = 0     
         else:
             leftPower = 0
             rightPower = 0
-    elif (forward > 5):
+    elif (forward > 50):
         # run and turn
         
-        if(turn > 20):
+        if(turn > 50):
             #   turn left slow down left motor
-            leftPower = forward -  maxTurnPower *  turn / 100
+            leftPower = forward * 0.3
             rightPower = forward
-        elif turn< (-20):
+        elif turn< (-50):
             #   turn right slow down right motor
-            rightPower = forward +  maxTurnPower *  turn / 100        
+            rightPower = forward * 0.3
             leftPower = forward
             # print("LP ", leftPower, " RP ", rightPower)  
         else:
             rightPower = forward
             leftPower = forward
-    elif (forward < -5):
+    elif (forward < -50):
         if(turn > 20):
             #   turn right slow down right motor
-            leftPower = forward +  maxTurnPower *  turn / 100
+            leftPower = forward * 0.3
             rightPower = forward
         elif turn < (-20):
             #   turn left slow down left motor
-            rightPower = forward -  maxTurnPower *  turn / 100        
+            rightPower = forward * 0.3      
             leftPower = forward
             
         else:
