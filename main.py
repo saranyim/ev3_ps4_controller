@@ -72,7 +72,6 @@ while event:
     (tv_sec, tv_usec, ev_type, code, value) = struct.unpack(FORMAT, event)
     if ev_type == 3 and code == 0:
         left_stick_x = value
-        left_stick_left = scale(left_stick_x, (0,255), (-50,50),-2,2)
     if(ev_type == 3 and code == 1):
         left_stick_y = value
         # print("LY ", left_stick_y)
